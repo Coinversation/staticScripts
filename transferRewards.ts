@@ -76,7 +76,6 @@ async function handleResults() {
       })
       .catch((e) => {
         console.error("transfer error, ", e);
-        r--;
         isConfirmed = true;
       });
 
