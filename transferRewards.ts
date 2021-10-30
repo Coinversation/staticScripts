@@ -22,7 +22,9 @@ let officialAccount: KeyringPair;
 
 async function main() {
   // Instantiate the API
-  const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws");
+  //wss://rpc.shiden.plasmnet.io
+  //wss://shiden.api.onfinality.io/public-ws
+  const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
   console.log("get provider");
   api = await ApiPromise.create({ provider: wsProvider });
   console.log("connect endpoint");
