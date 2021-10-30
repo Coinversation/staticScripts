@@ -18,7 +18,7 @@ let address_reward = new Map<string, number>();
 let api: ApiPromise;
 let officialAccount: KeyringPair;
 
-function handleRow(rawRow: any) {
+async function handleRow(rawRow: any) {
   const row: rewardInfo = {
     address: String(rawRow[0]),
     amount: Number.parseFloat(rawRow[1]),
@@ -43,6 +43,7 @@ function handleRow(rawRow: any) {
       }
     });
   //   console.log('Transfer sent with hash', hash)
+  await sleep(2000);
 }
 
 async function main() {
@@ -60,6 +61,10 @@ async function main() {
   );
 
   console.log("ended ");
+}
+
+function sleep(ms:number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 main()
