@@ -62,11 +62,20 @@ async function handleResults() {
             counter++;
         }
       })
-      .catch((e) => console.error("transfer error, ", e));
+      .catch((e) => {
+          console.error("transfer error, ", e)
+          isConfirmed = true;
+        });
 
+    let sleepCounter:number = 0;
     while (!isConfirmed && counter < 4) {
       console.log(`waitng for finalize: ${row.address}`);
-      await sleep(2000);
+      if(sleepCounter === 0){
+        await sleep(18000);
+      }else{
+        await sleep(2000);
+      }
+      sleepCounter++;
     }
     unsubP.catch(console.error).then((unsub) => {
       if (unsub) {
