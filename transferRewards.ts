@@ -102,7 +102,7 @@ async function handleResults() {
       });
 
     let sleepCounter: number = 0;
-    while (!isConfirmed && counter < 2) {
+    while (!isConfirmed && counter < 1) {
       console.log(`waitng for finalize: ${row.address}`);
       if (sleepCounter === 0) {
         await sleep(18000);
