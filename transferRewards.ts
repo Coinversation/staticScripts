@@ -115,7 +115,8 @@ async function main() {
   //wss://shiden.api.onfinality.io/public-ws
   // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
   const wsProvider = new WsProvider(
-    "wss://shiden.api.onfinality.io/public-ws"
+    "wss://shiden.api.onfinality.io/public-ws",
+    24000
   );
   console.log("get provider");
   api = await ApiPromise.create({ provider: wsProvider });
