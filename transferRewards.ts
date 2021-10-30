@@ -61,7 +61,7 @@ function handleResults() {
     );
 
     console.log(`sending row: ${row.address}, ${row.amount}`);
-    let finalStatus: ExtrinsicStatus = null;
+    let isFinalized: boolean = false;
     // Sign and send the transaction using our account
     const unsub = await transfer
       .signAndSend(officialAccount, (result) => {
@@ -80,12 +80,12 @@ function handleResults() {
           } else {
             console.error(`unsub is void ${row}`);
           }
+          isFinalized = true;
         }
-        finalStatus = result.status;
       })
       .catch((e) => console.error("transfer error, ", e));
 
-    while (!finalStatus || !finalStatus.isFinalized) {
+    while (!isFinalized) {
       console.log(`waitng for finalize: ${row}`);
       await sleep(2000);
     }
