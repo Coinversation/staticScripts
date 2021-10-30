@@ -20,29 +20,6 @@ let address_reward = new Map<string, number>();
 let api: ApiPromise;
 let officialAccount: KeyringPair;
 
-async function main() {
-  // Instantiate the API
-  //wss://rpc.shiden.plasmnet.io
-  //wss://shiden.api.onfinality.io/public-ws
-  const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
-  console.log("get provider");
-  api = await ApiPromise.create({ provider: wsProvider });
-  console.log("connect endpoint");
-
-  // Constuct the keyring after the API (crypto has an async init)
-  const keyring = new Keyring({ ss58Format: 5, type: "sr25519" });
-  officialAccount = keyring.addFromUri(shidenPhases);
-  console.log(
-    `${officialAccount.meta.name}: has address ${officialAccount.address}`
-  );
-
-  console.log("ended ");
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 let rewards: rewardInfo[];
 
 function cacheRow(rawRow: any) {
@@ -101,6 +78,30 @@ function handleResults() {
   });
   //   console.log('Transfer sent with hash', hash)
 }
+
+async function main() {
+    // Instantiate the API
+    //wss://rpc.shiden.plasmnet.io
+    //wss://shiden.api.onfinality.io/public-ws
+    // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
+    const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws");
+    console.log("get provider");
+    api = await ApiPromise.create({ provider: wsProvider });
+    console.log("connect endpoint");
+  
+    // Constuct the keyring after the API (crypto has an async init)
+    const keyring = new Keyring({ ss58Format: 5, type: "sr25519" });
+    officialAccount = keyring.addFromUri(shidenPhases);
+    console.log(
+      `${officialAccount.meta.name}: has address ${officialAccount.address}`
+    );
+  
+    console.log("ended ");
+  }
+  
+  function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
 main()
   .catch((e) => console.error("wss error, ", e))
