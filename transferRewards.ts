@@ -32,7 +32,7 @@ function cacheRow(rawRow: any) {
 }
 
 function handleResults() {
-  rewards.forEach(async (row) => {
+  rewards.forEach((row) => {
     // Create a extrinsic, transferring 12345 units to Bob
     const transfer = api.tx.balances.transfer(
       row.address,
@@ -42,7 +42,7 @@ function handleResults() {
     console.log(`sending row: ${row.address}, ${row.amount}`);
     let isFinalized: boolean = false;
     // Sign and send the transaction using our account
-    const unsub = await transfer
+    const unsubP = transfer
       .signAndSend(officialAccount, (result) => {
         console.log(`Current status is ${result.status}`);
 
@@ -54,11 +54,6 @@ function handleResults() {
           console.log(
             `Transaction finalized at blockHash ${result.status.asFinalized}`
           );
-          if (unsub) {
-            unsub();
-          } else {
-            console.error(`unsub is void ${row}`);
-          }
           isFinalized = true;
         }
       })
@@ -66,8 +61,15 @@ function handleResults() {
 
     while (!isFinalized) {
       console.log(`waitng for finalize: ${row}`);
-      await sleep(2000);
+      sleep(2000);
     }
+    unsubP.catch(console.error).then((unsub) => {
+      if (unsub) {
+        unsub();
+      } else {
+        console.error(`unsub is void ${row}`);
+      }
+    });
     //   .then((hash) => {
     //     if (hash) {
     //       console.log(`sended row: ${row.address}, ${row.amount}`);
@@ -80,28 +82,29 @@ function handleResults() {
 }
 
 async function main() {
-    // Instantiate the API
-    //wss://rpc.shiden.plasmnet.io
-    //wss://shiden.api.onfinality.io/public-ws
-    // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
-    const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws");
-    console.log("get provider");
-    api = await ApiPromise.create({ provider: wsProvider });
-    console.log("connect endpoint");
-  
-    // Constuct the keyring after the API (crypto has an async init)
-    const keyring = new Keyring({ ss58Format: 5, type: "sr25519" });
-    officialAccount = keyring.addFromUri(shidenPhases);
-    console.log(
-      `${officialAccount.meta.name}: has address ${officialAccount.address}`
-    );
-  
-    console.log("ended ");
-  }
-  
-  function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  // Instantiate the API
+  //wss://rpc.shiden.plasmnet.io
+  //wss://shiden.api.onfinality.io/public-ws
+  // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
+  const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws");
+  console.log("get provider");
+  api = await ApiPromise.create({ provider: wsProvider });
+  console.log("connect endpoint");
+
+  // Constuct the keyring after the API (crypto has an async init)
+  const keyring = new Keyring({ ss58Format: 5, type: "sr25519" });
+  officialAccount = keyring.addFromUri(shidenPhases);
+  console.log(
+    `${officialAccount.meta.name}: has address ${officialAccount.address}`
+  );
+
+  console.log("ended ");
+}
+
+function sleep(ms: number) {
+  // return new Promise((resolve) => setTimeout(resolve, ms));
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
 
 main()
   .catch((e) => console.error("wss error, ", e))
