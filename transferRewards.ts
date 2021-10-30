@@ -32,14 +32,15 @@ function cacheRow(rawRow: any) {
 }
 
 async function handleResults() {
+    console.log("len", rewards.length);
   for (let r = 0; r < rewards.length; r++) {
     while (!api.isConnected) {
       console.log(`waitng for connecting`);
-      try {
-        await api.connect();   
-      } catch (error) {
-          console.log("connecting error, ",error);
-      }
+    //   try {
+    //     await api.connect();   
+    //   } catch (error) {
+    //       console.log("connecting error, ",error);
+    //   }
       await sleep(2000);
     }
 
@@ -114,8 +115,7 @@ async function main() {
   //wss://shiden.api.onfinality.io/public-ws
   // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
   const wsProvider = new WsProvider(
-    "wss://shiden.api.onfinality.io/public-ws",
-    false
+    "wss://shiden.api.onfinality.io/public-ws"
   );
   console.log("get provider");
   api = await ApiPromise.create({ provider: wsProvider });
