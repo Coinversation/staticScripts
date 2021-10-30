@@ -31,8 +31,9 @@ function cacheRow(rawRow: any) {
   rewards.push(row);
 }
 
-function handleResults() {
-  rewards.forEach((row) => {
+async function handleResults() {
+  for (let r in rewards) {
+    const row = rewards[r];
     // Create a extrinsic, transferring 12345 units to Bob
     const transfer = api.tx.balances.transfer(
       row.address,
@@ -60,8 +61,8 @@ function handleResults() {
       .catch((e) => console.error("transfer error, ", e));
 
     while (!isFinalized) {
-      console.log(`waitng for finalize: ${row}`);
-      sleep(2000);
+      console.log(`waitng for finalize: ${row.address}`);
+      await sleep(2000);
     }
     unsubP.catch(console.error).then((unsub) => {
       if (unsub) {
@@ -77,7 +78,8 @@ function handleResults() {
     //       console.log("nothing");
     //     }
     //   });
-  });
+  }
+
   //   console.log('Transfer sent with hash', hash)
 }
 
@@ -102,8 +104,8 @@ async function main() {
 }
 
 function sleep(ms: number) {
-  // return new Promise((resolve) => setTimeout(resolve, ms));
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  return new Promise((resolve) => setTimeout(resolve, ms));
+  //   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
 main()
