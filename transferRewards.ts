@@ -38,11 +38,12 @@ function cacheRow(rawRow: any) {
 
 async function handleResults() {
   console.log("len", rewards.length);
-  const nonce = (await api.query.system.account(kaco_dev2)).nonce;
+  let nonce = (await api.query.system.account(kaco_dev2)).nonce;
   console.log("nonce: ", nonce.toString(10));
+  const one = new BN(1, 10);
+  nonce.isub(one);
 
   for (let r = 0; r < rewards.length; r++) {
-    const bnR = new BN(r, 10);
     while (!api.isConnected) {
       console.log(`waitng for connecting`);
       //   try {
@@ -66,7 +67,7 @@ async function handleResults() {
     );
 
     const unsubP = transfer
-      .signAndSend(officialAccount, { nonce: nonce.add(bnR) }, (result) => {
+      .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, (result) => {
         console.log(`Current status is ${result.status}`);
 
         if (result.status.isInBlock) {
@@ -83,7 +84,7 @@ async function handleResults() {
           counter++;
         }
       })
-      .catch((e) => {
+      .catch(async (e) => {
         console.error("transfer error, ", e);
         isConfirmed = true;
         csvFile
@@ -91,6 +92,13 @@ async function handleResults() {
           .catch((e) =>
             console.error(`csv append error: ${row.address}, e: ${e}`)
           );
+        try{
+            nonce = (await api.query.system.account(kaco_dev2)).nonce;
+            console.log("nonce: ", nonce.toString(10));
+            nonce.isub(one);
+        }catch(e){
+            console.error("nonce error, ", e);
+        }
       });
 
     let sleepCounter: number = 0;
