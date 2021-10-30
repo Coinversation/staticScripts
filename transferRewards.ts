@@ -9,7 +9,7 @@ import * as csv from "fast-csv";
 import { Result } from "@polkadot/types";
 import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 
-const fileName = `sumedRewardTest.csv`;
+const fileName = `sumedReward.csv`;
 
 interface rewardInfo {
   address: string;
