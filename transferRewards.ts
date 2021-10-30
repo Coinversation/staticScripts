@@ -75,7 +75,7 @@ main()
       .on("error", (error) => {
         console.error(error);
       })
-      .on("data", async (row) => await handleRow(row))
+      .on("data", (row) => handleRow(row))
       .on("end", (rowCount: number) => {
         console.log(`Parsed ${rowCount} rows`);
       });
