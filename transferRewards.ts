@@ -20,7 +20,7 @@ let address_reward = new Map<string, number>();
 let api: ApiPromise;
 let officialAccount: KeyringPair;
 
-let rewards: rewardInfo[];
+let rewards: rewardInfo[] = [];
 
 function cacheRow(rawRow: any) {
   const row: rewardInfo = {
