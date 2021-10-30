@@ -41,7 +41,7 @@ async function handleResults() {
     );
 
     console.log(`sending row: ${row.address}, ${row.amount}`);
-    let isFinalized: boolean = false;
+    let isConfirmed: boolean = false;
     // Sign and send the transaction using our account
     const unsubP = transfer
       .signAndSend(officialAccount, (result) => {
@@ -49,18 +49,19 @@ async function handleResults() {
 
         if (result.status.isInBlock) {
           console.log(
-            `Transaction included at blockHash ${result.status.asInBlock}`
+            `Transaction included at blockHash ${result.status.asInBlock} ${row.address}`
           );
+          isConfirmed = true;
         } else if (result.status.isFinalized) {
           console.log(
-            `Transaction finalized at blockHash ${result.status.asFinalized}`
+            `Transaction finalized at blockHash ${result.status.asFinalized} ${row.address}`
           );
-          isFinalized = true;
+          isConfirmed = true;
         }
       })
       .catch((e) => console.error("transfer error, ", e));
 
-    while (!isFinalized) {
+    while (!isConfirmed) {
       console.log(`waitng for finalize: ${row.address}`);
       await sleep(2000);
     }
@@ -68,7 +69,7 @@ async function handleResults() {
       if (unsub) {
         unsub();
       } else {
-        console.error(`unsub is void ${row}`);
+        console.error(`unsub is void ${row.address}`);
       }
     });
     //   .then((hash) => {
