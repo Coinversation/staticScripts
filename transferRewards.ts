@@ -85,7 +85,7 @@ function handleResults() {
       })
       .catch((e) => console.error("transfer error, ", e));
 
-    while (!finalStatus.isFinalized) {
+    while (!finalStatus || !finalStatus.isFinalized) {
       console.log(`waitng for finalize: ${row}`);
       await sleep(2000);
     }
