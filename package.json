@@ -1,0 +1,24 @@
+{
+  "name": "lpstaticcount",
+  "version": "1.0.0",
+  "description": "count the LP deposit in MasterChef",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "kaco",
+    "count",
+    "LP"
+  ],
+  "author": "Letho",
+  "license": "MIT",
+  "dependencies": {
+    "@polkadot/api": "^6.5.2",
+    "@polkadot/keyring": "^7.6.1",
+    "fast-csv": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
