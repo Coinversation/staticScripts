@@ -39,9 +39,10 @@ function cacheRow(rawRow: any) {
 async function handleResults() {
   console.log("len", rewards.length);
   const nonce = (await api.query.system.account(kaco_dev2)).nonce;
-  console.log("nonce: ", nonce);
-  const one = new BN("1", 2);
+  console.log("nonce: ", nonce.toString(10));
+
   for (let r = 0; r < rewards.length; r++) {
+    const bnR = new BN(r, 10);
     while (!api.isConnected) {
       console.log(`waitng for connecting`);
       //   try {
@@ -65,7 +66,7 @@ async function handleResults() {
     );
 
     const unsubP = transfer
-      .signAndSend(officialAccount, { nonce: nonce.add(one) }, (result) => {
+      .signAndSend(officialAccount, { nonce: nonce.add(bnR) }, (result) => {
         console.log(`Current status is ${result.status}`);
 
         if (result.status.isInBlock) {
