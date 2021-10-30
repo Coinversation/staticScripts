@@ -61,7 +61,7 @@ function handleResults() {
     );
 
     console.log(`sending row: ${row.address}, ${row.amount}`);
-    let finalStatus: ExtrinsicStatus | undefined = undefined;
+    let finalStatus: ExtrinsicStatus = null;
     // Sign and send the transaction using our account
     const unsub = await transfer
       .signAndSend(officialAccount, (result) => {
