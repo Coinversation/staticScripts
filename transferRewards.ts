@@ -32,18 +32,29 @@ function cacheRow(rawRow: any) {
 }
 
 async function handleResults() {
-  for (let r in rewards) {
+  for (let r = 0; r < rewards.length; r++) {
+    while (!api.isConnected) {
+      console.log(`waitng for connecting`);
+      try {
+        await api.connect();   
+      } catch (error) {
+          console.log("connecting error, ",error);
+      }
+      await sleep(2000);
+    }
+
     const row = rewards[r];
+    console.log(`sending row: ${row.address}, ${row.amount}`);
+    let isConfirmed: boolean = false;
+    // Sign and send the transaction using our account
+    let counter: number = 0;
+
     // Create a extrinsic, transferring 12345 units to Bob
     const transfer = api.tx.balances.transfer(
       row.address,
       BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
     );
 
-    console.log(`sending row: ${row.address}, ${row.amount}`);
-    let isConfirmed: boolean = false;
-    // Sign and send the transaction using our account
-    let counter:number = 0;
     const unsubP = transfer
       .signAndSend(officialAccount, (result) => {
         console.log(`Current status is ${result.status}`);
@@ -58,21 +69,22 @@ async function handleResults() {
             `Transaction finalized at blockHash ${result.status.asFinalized} ${row.address}`
           );
           isConfirmed = true;
-        } else if (result.status.isBroadcast){
-            counter++;
+        } else if (result.status.isBroadcast) {
+          counter++;
         }
       })
       .catch((e) => {
-          console.error("transfer error, ", e)
-          isConfirmed = true;
-        });
+        console.error("transfer error, ", e);
+        r--;
+        isConfirmed = true;
+      });
 
-    let sleepCounter:number = 0;
-    while (!isConfirmed && counter < 4) {
+    let sleepCounter: number = 0;
+    while (!isConfirmed && counter < 2) {
       console.log(`waitng for finalize: ${row.address}`);
-      if(sleepCounter === 0){
+      if (sleepCounter === 0) {
         await sleep(18000);
-      }else{
+      } else {
         await sleep(2000);
       }
       sleepCounter++;
@@ -101,7 +113,10 @@ async function main() {
   //wss://rpc.shiden.plasmnet.io
   //wss://shiden.api.onfinality.io/public-ws
   // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
-  const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws", 24000);
+  const wsProvider = new WsProvider(
+    "wss://shiden.api.onfinality.io/public-ws",
+    false
+  );
   console.log("get provider");
   api = await ApiPromise.create({ provider: wsProvider });
   console.log("connect endpoint");
