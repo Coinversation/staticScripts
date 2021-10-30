@@ -43,6 +43,7 @@ async function handleResults() {
     console.log(`sending row: ${row.address}, ${row.amount}`);
     let isConfirmed: boolean = false;
     // Sign and send the transaction using our account
+    let counter:number = 0;
     const unsubP = transfer
       .signAndSend(officialAccount, (result) => {
         console.log(`Current status is ${result.status}`);
@@ -57,11 +58,13 @@ async function handleResults() {
             `Transaction finalized at blockHash ${result.status.asFinalized} ${row.address}`
           );
           isConfirmed = true;
+        } else if (result.status.isBroadcast){
+            counter++;
         }
       })
       .catch((e) => console.error("transfer error, ", e));
 
-    while (!isConfirmed) {
+    while (!isConfirmed && counter < 4) {
       console.log(`waitng for finalize: ${row.address}`);
       await sleep(2000);
     }
@@ -89,7 +92,7 @@ async function main() {
   //wss://rpc.shiden.plasmnet.io
   //wss://shiden.api.onfinality.io/public-ws
   // const wsProvider = new WsProvider("wss://rpc.shiden.plasmnet.io");
-  const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws");
+  const wsProvider = new WsProvider("wss://shiden.api.onfinality.io/public-ws", 24000);
   console.log("get provider");
   api = await ApiPromise.create({ provider: wsProvider });
   console.log("connect endpoint");
