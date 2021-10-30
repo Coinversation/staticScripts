@@ -11,7 +11,7 @@ import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 import BN from "bn.js";
 import { CsvFile } from "./rwCsv";
 
-const fileName = `sumedRewardTest.csv`;
+const fileName = `sumedReward.csv`;
 const lostFileName = "rewardsLost.csv";
 
 const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
@@ -86,7 +86,11 @@ async function handleResults() {
       .catch((e) => {
         console.error("transfer error, ", e);
         isConfirmed = true;
-        csvFile.append([{address: row.address, amout: row.amount}])
+        csvFile
+          .append([{ address: row.address, amout: row.amount }])
+          .catch((e) =>
+            console.error(`csv append error: ${row.address}, e: ${e}`)
+          );
       });
 
     let sleepCounter: number = 0;
