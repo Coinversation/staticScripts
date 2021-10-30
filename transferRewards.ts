@@ -8,8 +8,13 @@ import * as path from "path";
 import * as csv from "fast-csv";
 import { Result } from "@polkadot/types";
 import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
+import BN from "bn.js";
+import { CsvFile } from "./rwCsv";
 
-const fileName = `sumedReward.csv`;
+const fileName = `sumedRewardTest.csv`;
+const lostFileName = "rewardsLost.csv";
+
+const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
 
 interface rewardInfo {
   address: string;
@@ -19,8 +24,8 @@ interface rewardInfo {
 let address_reward = new Map<string, number>();
 let api: ApiPromise;
 let officialAccount: KeyringPair;
-
 let rewards: rewardInfo[] = [];
+let csvFile: CsvFile;
 
 function cacheRow(rawRow: any) {
   const row: rewardInfo = {
@@ -32,15 +37,18 @@ function cacheRow(rawRow: any) {
 }
 
 async function handleResults() {
-    console.log("len", rewards.length);
+  console.log("len", rewards.length);
+  const nonce = (await api.query.system.account(kaco_dev2)).nonce;
+  console.log("nonce: ", nonce);
+  const one = new BN("1", 2);
   for (let r = 0; r < rewards.length; r++) {
     while (!api.isConnected) {
       console.log(`waitng for connecting`);
-    //   try {
-    //     await api.connect();   
-    //   } catch (error) {
-    //       console.log("connecting error, ",error);
-    //   }
+      //   try {
+      //     await api.connect();
+      //   } catch (error) {
+      //       console.log("connecting error, ",error);
+      //   }
       await sleep(2000);
     }
 
@@ -57,7 +65,7 @@ async function handleResults() {
     );
 
     const unsubP = transfer
-      .signAndSend(officialAccount, (result) => {
+      .signAndSend(officialAccount, { nonce: nonce.add(one) }, (result) => {
         console.log(`Current status is ${result.status}`);
 
         if (result.status.isInBlock) {
@@ -77,6 +85,7 @@ async function handleResults() {
       .catch((e) => {
         console.error("transfer error, ", e);
         isConfirmed = true;
+        csvFile.append([{address: row.address, amout: row.amount}])
       });
 
     let sleepCounter: number = 0;
@@ -109,6 +118,12 @@ async function handleResults() {
 }
 
 async function main() {
+  csvFile = new CsvFile({
+    path: path.resolve(__dirname, lostFileName),
+    // headers to write
+    headers: ["address", "amount"],
+  });
+
   // Instantiate the API
   //wss://rpc.shiden.plasmnet.io
   //wss://shiden.api.onfinality.io/public-ws
