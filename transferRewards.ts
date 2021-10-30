@@ -6,6 +6,8 @@ import { shidenPhases } from "../../secret.json";
 import * as fs from "fs";
 import * as path from "path";
 import * as csv from "fast-csv";
+import { Result } from "@polkadot/types";
+import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 
 const fileName = `sumedRewardTest.csv`;
 
@@ -17,34 +19,6 @@ interface rewardInfo {
 let address_reward = new Map<string, number>();
 let api: ApiPromise;
 let officialAccount: KeyringPair;
-
-async function handleRow(rawRow: any) {
-  const row: rewardInfo = {
-    address: String(rawRow[0]),
-    amount: Number.parseFloat(rawRow[1]),
-  };
-
-  // Create a extrinsic, transferring 12345 units to Bob
-  const transfer = api.tx.balances.transfer(
-    row.address,
-    BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
-  );
-
-  console.log(`sending row: ${row.address}, ${row.amount}`);
-  // Sign and send the transaction using our account
-  transfer
-    .signAndSend(officialAccount)
-    .catch((e) => console.error("transfer error, ", e))
-    .then((hash) => {
-      if (hash) {
-        console.log(`sended row: ${row.address}, ${row.amount}`);
-      } else {
-        console.log("nothing");
-      }
-    });
-  //   console.log('Transfer sent with hash', hash)
-  await sleep(2000);
-}
 
 async function main() {
   // Instantiate the API
@@ -63,8 +37,67 @@ async function main() {
   console.log("ended ");
 }
 
-function sleep(ms:number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+let rewards: rewardInfo[];
+
+function cacheRow(rawRow: any) {
+  const row: rewardInfo = {
+    address: String(rawRow[0]),
+    amount: Number.parseFloat(rawRow[1]),
+  };
+
+  rewards.push(row);
+}
+
+function handleResults() {
+  rewards.forEach(async (row) => {
+    // Create a extrinsic, transferring 12345 units to Bob
+    const transfer = api.tx.balances.transfer(
+      row.address,
+      BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
+    );
+
+    console.log(`sending row: ${row.address}, ${row.amount}`);
+    let finalStatus: ExtrinsicStatus;
+    // Sign and send the transaction using our account
+    const unsub = await transfer
+      .signAndSend(officialAccount, (result) => {
+        console.log(`Current status is ${result.status}`);
+
+        if (result.status.isInBlock) {
+          console.log(
+            `Transaction included at blockHash ${result.status.asInBlock}`
+          );
+        } else if (result.status.isFinalized) {
+          console.log(
+            `Transaction finalized at blockHash ${result.status.asFinalized}`
+          );
+          if (unsub) {
+            unsub();
+          } else {
+            console.error(`unsub is void ${row}`);
+          }
+        }
+        finalStatus = result.status;
+      })
+      .catch((e) => console.error("transfer error, ", e));
+
+    while (!finalStatus.isFinalized) {
+      console.log(`waitng for finalize: ${row}`);
+      await sleep(2000);
+    }
+    //   .then((hash) => {
+    //     if (hash) {
+    //       console.log(`sended row: ${row.address}, ${row.amount}`);
+    //     } else {
+    //       console.log("nothing");
+    //     }
+    //   });
+  });
+  //   console.log('Transfer sent with hash', hash)
 }
 
 main()
@@ -75,8 +108,9 @@ main()
       .on("error", (error) => {
         console.error(error);
       })
-      .on("data", (row) => handleRow(row))
+      .on("data", (row) => cacheRow(row))
       .on("end", (rowCount: number) => {
         console.log(`Parsed ${rowCount} rows`);
+        handleResults();
       });
   });
