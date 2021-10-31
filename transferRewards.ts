@@ -66,6 +66,21 @@ async function handleResults() {
       BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
     );
 
+    const revertTrans = async () => {
+      csvFile
+        .append([{ address: row.address, amout: row.amount }])
+        .catch((e) =>
+          console.error(`csv append error: ${row.address}, e: ${e}`)
+        );
+      try {
+        nonce = (await api.query.system.account(kaco_dev2)).nonce;
+        console.log("nonce: ", nonce.toString(10));
+        nonce.isub(one);
+      } catch (e) {
+        console.error("nonce error, ", e);
+      }
+    };
+
     const unsubP = transfer
       .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, (result) => {
         console.log(`Current status is ${result.status}`);
@@ -82,23 +97,15 @@ async function handleResults() {
           isConfirmed = true;
         } else if (result.status.isBroadcast) {
           counter++;
+        } else if (result.status.isFuture || result.status.isDropped || result.status.isInvalid) {
+          isConfirmed = true;
+          r--;
         }
       })
       .catch(async (e) => {
-        console.error("transfer error, ", e);
+        console.error(`transfer error for ${row.address} error: ${e}`);
         isConfirmed = true;
-        csvFile
-          .append([{ address: row.address, amout: row.amount }])
-          .catch((e) =>
-            console.error(`csv append error: ${row.address}, e: ${e}`)
-          );
-        try{
-            nonce = (await api.query.system.account(kaco_dev2)).nonce;
-            console.log("nonce: ", nonce.toString(10));
-            nonce.isub(one);
-        }catch(e){
-            console.error("nonce error, ", e);
-        }
+        await revertTrans();
       });
 
     let sleepCounter: number = 0;
@@ -132,7 +139,7 @@ async function handleResults() {
 
 async function main() {
   csvFile = new CsvFile({
-    path: path.resolve(__dirname, lostFileName),
+    path: path.resolve(__dirname, "assets", lostFileName),
     // headers to write
     headers: ["address", "amount"],
   });
