@@ -10,6 +10,7 @@ import { Result } from "@polkadot/types";
 import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 import BN from "bn.js";
 import { CsvFile } from "./rwCsv";
+import util from "util";
 
 const fileName = `sumedReward.csv`;
 const lostFileName = "rewardsLost.csv";
@@ -70,7 +71,7 @@ async function handleResults() {
       csvFile
         .append([{ address: row.address, amount: row.amount }])
         .catch((e) =>
-          console.error(`csv append error: ${row.address}, e: ${e}`)
+          console.log(`csv append error: ${row.address}, e: ${e}`)
         );
       await resetNonce();
     };
@@ -81,34 +82,42 @@ async function handleResults() {
         console.log(`nonce: ${nonce.toString(10)} for ${row.address}`);
         nonce.isub(one);
       } catch (e) {
-        console.error(`nonce error for ${row.address}, e: ${e}`);
+        console.log(`nonce error for ${row.address}, e: ${e}`);
       }
     };
 
     const unsubP = transfer
-      .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, async (result) => {
-        console.log(`Current status is ${result.status} for ${row.address}`);
+      .signAndSend(
+        officialAccount,
+        { nonce: nonce.iadd(one) },
+        async (result) => {
+          console.log(`Current status is ${result.status} for ${row.address}`);
 
-        if (result.status.isInBlock) {
-          console.log(
-            `Transaction included at blockHash ${result.status.asInBlock} ${row.address}`
-          );
-          isConfirmed = true;
-        } else if (result.status.isFinalized) {
-          console.log(
-            `Transaction finalized at blockHash ${result.status.asFinalized} ${row.address}`
-          );
-          isConfirmed = true;
-        } else if (result.status.isBroadcast) {
-          counter++;
-        } else if (result.status.isFuture || result.status.isDropped || result.status.isInvalid) {
-          isConfirmed = true;
-          await resetNonce();
-          r--;
+          if (result.status.isInBlock) {
+            console.log(
+              `Transaction included at blockHash ${result.status.asInBlock} ${row.address}`
+            );
+            isConfirmed = true;
+          } else if (result.status.isFinalized) {
+            console.log(
+              `Transaction finalized at blockHash ${result.status.asFinalized} ${row.address}`
+            );
+            isConfirmed = true;
+          } else if (result.status.isBroadcast) {
+            counter++;
+          } else if (
+            result.status.isFuture ||
+            result.status.isDropped ||
+            result.status.isInvalid
+          ) {
+            isConfirmed = true;
+            await resetNonce();
+            r--;
+          }
         }
-      })
+      )
       .catch(async (e) => {
-        console.error(`transfer error for ${row.address} error: ${e}`);
+        console.log(`transfer error for ${row.address} error: ${e}`);
         isConfirmed = true;
         await saveFailedTrans();
       });
@@ -124,16 +133,16 @@ async function handleResults() {
       sleepCounter++;
     }
 
-    if(!api.isConnected){
-        console.error(`connection lost for ${row.address}`);
-        await saveFailedTrans();
+    if (!api.isConnected) {
+      console.log(`connection lost for ${row.address}`);
+      await saveFailedTrans();
     }
 
-    unsubP.catch(console.error).then((unsub) => {
+    unsubP.catch(console.log).then((unsub) => {
       if (unsub) {
         unsub();
       } else {
-        console.error(`unsub is void ${row.address}`);
+        console.log(`unsub is void ${row.address}`);
       }
     });
     //   .then((hash) => {
@@ -154,6 +163,14 @@ async function main() {
     // headers to write
     headers: ["address", "amount"],
   });
+
+  var log_file = fs.createWriteStream(__dirname + "/debug.log", { flags: "w" });
+  var log_stdout = process.stdout;
+
+  console.log = function (d) {
+    log_file.write(util.format(d) + "\n");
+    log_stdout.write(util.format(d) + "\n");
+  };
 
   // Instantiate the API
   //wss://rpc.shiden.plasmnet.io
@@ -183,12 +200,12 @@ function sleep(ms: number) {
 }
 
 main()
-  .catch((e) => console.error("wss error, ", e))
+  .catch((e) => console.log("wss error, ", e))
   .then(() => {
     fs.createReadStream(path.resolve(__dirname, "assets", fileName))
       .pipe(csv.parse({ headers: false }))
       .on("error", (error) => {
-        console.error(error);
+        console.log(error);
       })
       .on("data", (row) => cacheRow(row))
       .on("end", (rowCount: number) => {
