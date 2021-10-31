@@ -78,16 +78,16 @@ async function handleResults() {
     const resetNonce = async () => {
       try {
         nonce = (await api.query.system.account(kaco_dev2)).nonce;
-        console.log("nonce: ", nonce.toString(10));
+        console.log(`nonce: ${nonce.toString(10)} for ${row.address}`);
         nonce.isub(one);
       } catch (e) {
-        console.error("nonce error, ", e);
+        console.error(`nonce error for ${row.address}, e: ${e}`);
       }
     };
 
     const unsubP = transfer
       .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, async (result) => {
-        console.log(`Current status is ${result.status}`);
+        console.log(`Current status is ${result.status} for ${row.address}`);
 
         if (result.status.isInBlock) {
           console.log(
@@ -114,7 +114,7 @@ async function handleResults() {
       });
 
     let sleepCounter: number = 0;
-    while (!isConfirmed && counter < 1) {
+    while (!isConfirmed && counter < 1 && api.isConnected) {
       console.log(`waitng for finalize: ${row.address}`);
       if (sleepCounter === 0) {
         await sleep(18000);
@@ -123,6 +123,12 @@ async function handleResults() {
       }
       sleepCounter++;
     }
+
+    if(!api.isConnected){
+        console.error(`connection lost for ${row.address}`);
+        await saveFailedTrans();
+    }
+
     unsubP.catch(console.error).then((unsub) => {
       if (unsub) {
         unsub();
