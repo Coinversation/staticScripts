@@ -12,7 +12,7 @@ import BN from "bn.js";
 import { CsvFile } from "./rwCsv";
 import util from "util";
 
-const fileName = `sumedReward.csv`;
+const fileName = `sumedRewardTest.csv`;
 const lostFileName = "rewardsLost.csv";
 
 const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
@@ -67,13 +67,19 @@ async function handleResults() {
       BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
     );
 
+    let isSavedFailedTrans = false;
     const saveFailedTrans = async () => {
-      csvFile
-        .append([{ address: row.address, amount: row.amount }])
-        .catch((e) =>
-          console.log(`csv append error: ${row.address}, e: ${e}`)
-        );
-      await resetNonce();
+      if (!isSavedFailedTrans) {
+        csvFile
+          .append([{ address: row.address, amount: row.amount }])
+          .catch((e) =>
+            console.log(`csv append error: ${row.address}, e: ${e}`)
+          );
+        isSavedFailedTrans = true;
+        await resetNonce();
+      } else {
+        console.log(`already saved for row: ${row.address}`);
+      }
     };
 
     const resetNonce = async () => {
