@@ -112,7 +112,7 @@ async function handleResults() {
           ) {
             isConfirmed = true;
             await resetNonce();
-            r--;
+            // r--;
           }
         }
       )
