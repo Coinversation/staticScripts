@@ -66,12 +66,16 @@ async function handleResults() {
       BigInt((row.amount * 1000000).toFixed(0)) * BigInt(1000000000000)
     );
 
-    const revertTrans = async () => {
+    const saveFailedTrans = async () => {
       csvFile
-        .append([{ address: row.address, amout: row.amount }])
+        .append([{ address: row.address, amount: row.amount }])
         .catch((e) =>
           console.error(`csv append error: ${row.address}, e: ${e}`)
         );
+      await resetNonce();
+    };
+
+    const resetNonce = async () => {
       try {
         nonce = (await api.query.system.account(kaco_dev2)).nonce;
         console.log("nonce: ", nonce.toString(10));
@@ -82,7 +86,7 @@ async function handleResults() {
     };
 
     const unsubP = transfer
-      .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, (result) => {
+      .signAndSend(officialAccount, { nonce: nonce.iadd(one) }, async (result) => {
         console.log(`Current status is ${result.status}`);
 
         if (result.status.isInBlock) {
@@ -99,13 +103,14 @@ async function handleResults() {
           counter++;
         } else if (result.status.isFuture || result.status.isDropped || result.status.isInvalid) {
           isConfirmed = true;
+          await resetNonce();
           r--;
         }
       })
       .catch(async (e) => {
         console.error(`transfer error for ${row.address} error: ${e}`);
         isConfirmed = true;
-        await revertTrans();
+        await saveFailedTrans();
       });
 
     let sleepCounter: number = 0;
