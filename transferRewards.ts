@@ -9,7 +9,7 @@ import * as csv from "fast-csv";
 import { Result } from "@polkadot/types";
 import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 import BN from "bn.js";
-import { CsvFile } from "./rwCsv";
+import { CsvFile } from "./lib/rwCsv";
 import util from "util";
 
 const fileName = `sumedRewardTest.csv`;
@@ -128,15 +128,10 @@ async function handleResults() {
         await saveFailedTrans();
       });
 
-    let sleepCounter: number = 0;
+
     while (!isConfirmed && counter < 1 && api.isConnected) {
       console.log(`waitng for finalize: ${row.address}`);
-      if (sleepCounter === 0) {
-        await sleep(18000);
-      } else {
-        await sleep(2000);
-      }
-      sleepCounter++;
+      await sleep(2000);
     }
 
     if (!api.isConnected) {
