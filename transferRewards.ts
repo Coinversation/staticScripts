@@ -40,18 +40,13 @@ function cacheRow(rawRow: any) {
 async function handleResults() {
   console.log("len", rewards.length);
   let nonce = (await api.query.system.account(kaco_dev2)).nonce;
-  console.log("nonce: ", nonce.toString(10));
   const one = new BN(1, 10);
   nonce.isub(one);
+  console.log(`initial nonce: ${nonce.toString(10)}, nonce: ${nonce}`);
 
   for (let r = 0; r < rewards.length; r++) {
     while (!api.isConnected) {
       console.log(`waitng for connecting`);
-      //   try {
-      //     await api.connect();
-      //   } catch (error) {
-      //       console.log("connecting error, ",error);
-      //   }
       await sleep(2000);
     }
 
@@ -85,8 +80,8 @@ async function handleResults() {
     const resetNonce = async () => {
       try {
         nonce = (await api.query.system.account(kaco_dev2)).nonce;
-        console.log(`nonce: ${nonce.toString(10)} for ${row.address}`);
         nonce.isub(one);
+        console.log(`nonce: ${nonce.toString(10)} for ${row.address}`);
       } catch (e) {
         console.log(`nonce error for ${row.address}, e: ${e}`);
       }
@@ -117,7 +112,7 @@ async function handleResults() {
             result.status.isInvalid
           ) {
             isConfirmed = true;
-            await resetNonce();
+            await saveFailedTrans();
             // r--;
           }
         }
@@ -189,7 +184,7 @@ async function main() {
   const keyring = new Keyring({ ss58Format: 5, type: "sr25519" });
   officialAccount = keyring.addFromUri(shidenPhases);
   console.log(
-    `${officialAccount.meta.name}: has address ${officialAccount.address}`
+    `${officialAccount.meta}: has address ${officialAccount.address}`
   );
 
   console.log("ended ");
@@ -197,7 +192,6 @@ async function main() {
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-  //   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
 main()

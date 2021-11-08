@@ -89,17 +89,20 @@ function diff() {
   csvStream.pipe(process.stdout).on("end", () => process.exit());
 
   let counter: number = 0;
+  let sum: number = 0;
   address_reward.forEach((_value: number, _address: string) => {
     // console.log("address %s, quantity: %f ",address, value);
     const transed = address_transed.get(_address);
     if(!transed || transed <= 0){
         csvStream.write({ address: _address, quantity: _value });
+        counter++;
+        sum += _value;
     }
-    counter++;
   });
 
   console.log("");
   console.log("count: ", counter);
+  console.log("sum: ", sum);
 
   csvStream.end();
 }

@@ -3,11 +3,11 @@ import * as path from 'path';
 import * as csv from 'fast-csv';
 
 
-const era = 12
-const claimedReward:number = 2252;
-const totalStaked:number = 1193400;
+const era = 18
+const totalStaked:number = 1297500;
+const claimedReward:number = 2329.4;
 
-const rewardPerShare = claimedReward / 2.0 / totalStaked;
+const rewardPerShare = claimedReward * 0.8 / 2.0 / totalStaked;
 const fileName = `dApp staking copy ${era}.csv`;
 
 fs.createReadStream(path.resolve(__dirname, 'assets', fileName))
@@ -15,8 +15,8 @@ fs.createReadStream(path.resolve(__dirname, 'assets', fileName))
     .on('error', error => console.error(error))
     .on('data', row => handleRow(row))
     .on('end', (rowCount: number) => {
-        console.log(`Parsed ${rowCount} rows`);
         printAll();
+        console.log(`Parsed ${rowCount} rows`);
     });
 
 interface userDepositInfo{
