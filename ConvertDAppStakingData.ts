@@ -3,9 +3,9 @@ import * as path from 'path';
 import * as csv from 'fast-csv';
 
 
-const era = 18
-const totalStaked:number = 1297500;
-const claimedReward:number = 2329.4;
+const era = 23
+const totalStaked:number = 1228800;
+const claimedReward:number = 1885.0;
 
 const rewardPerShare = claimedReward * 0.8 / 2.0 / totalStaked;
 const fileName = `dApp staking copy ${era}.csv`;
@@ -51,8 +51,10 @@ function handleRow(rawRow:any){
 }
 
 function printAll(){
-    const csvStream = csv.format({ headers: true });
-    csvStream.pipe(process.stdout).on('end', () => process.exit());
+    const csvStream = csv.format({ headers: false });
+    const fileStream = fs.createWriteStream("./assets/rewardStatic.csv", {flags: 'a'});
+    fileStream.write('\n');
+    csvStream.pipe(fileStream).on('end', () => process.exit());
 
     let sum:number = 0;
     address_reward.forEach((_value:number, _address:string) => {
@@ -60,6 +62,7 @@ function printAll(){
         csvStream.write({ address: _address, quantity: _value });
         sum += _value;
     })
+
 
     console.log("");
     console.log("total: ", sum);

@@ -113,7 +113,6 @@ async function handleResults() {
           ) {
             isConfirmed = true;
             await saveFailedTrans();
-            // r--;
           }
         }
       )
