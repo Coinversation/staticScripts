@@ -12,7 +12,7 @@ import BN from "bn.js";
 import { CsvFile } from "./lib/rwCsv";
 import util from "util";
 
-const fileName = `sumedRewardTest.csv`;
+const fileName = `sumedReward.csv`;
 const lostFileName = "rewardsLost.csv";
 
 const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";

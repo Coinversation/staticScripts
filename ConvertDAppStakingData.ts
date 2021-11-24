@@ -3,9 +3,9 @@ import * as path from 'path';
 import * as csv from 'fast-csv';
 
 
-const era = 23
-const totalStaked:number = 1228800;
-const claimedReward:number = 1885.0;
+const era = 29
+const totalStaked:number = 1420500;
+const claimedReward:number = 1885.4;
 
 const rewardPerShare = claimedReward * 0.8 / 2.0 / totalStaked;
 const fileName = `dApp staking copy ${era}.csv`;
