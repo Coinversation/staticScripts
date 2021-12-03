@@ -2,18 +2,18 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { shidenPhases } from "../../secret.json";
+import { shidenPhases } from "../../../../secret.json";
 import * as fs from "fs";
 import * as path from "path";
 import * as csv from "fast-csv";
 import { Result } from "@polkadot/types";
 import type { ExtrinsicStatus } from "@polkadot/types/interfaces/author";
 import BN from "bn.js";
-import { CsvFile } from "./lib/rwCsv";
+import { CsvFile } from "../../lib/rwCsv";
 import util from "util";
 
-const fileName = `sumedReward.csv`;
-const lostFileName = "rewardsLost.csv";
+const fileName = `../../sumedReward.csv`;
+const lostFileName = "../../rewardsLost.csv";
 
 const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
 

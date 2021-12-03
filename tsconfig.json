@@ -8,5 +8,5 @@
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test", "./typechain"]
+  "include": ["./src", "./test", "./typechain"]
 }

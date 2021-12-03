@@ -4,7 +4,7 @@ import * as csv from 'fast-csv';
 
 
 const masterChefAddress = "0x81b71d0bc2de38e37978e6701c342d0b7aa67d59";
-const fileName = "export-address-token-0x81b71D0bC2De38e37978E6701C342d0b7AA67D59.csv";
+const fileName = "../../export-address-token-0x81b71D0bC2De38e37978E6701C342d0b7AA67D59.csv";
 
 const token_address_amount = new Map<string, Map<string, number>>();
 const contractAddress_lpName = new Map<string, string>();

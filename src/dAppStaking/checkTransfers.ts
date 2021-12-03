@@ -2,8 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as csv from "fast-csv";
 
-const transferHistoryFileName = `sb9TransferHistory.csv`;
-const sumedRewardFileName = `sumedReward.csv`;
+const transferHistoryFileName = `../../sb9TransferHistory.csv`;
+const sumedRewardFileName = `../../sumedReward.csv`;
 
 
 const sb9 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
