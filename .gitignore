@@ -38,3 +38,5 @@ debug.log*
 
 # assets
 kacLPStatic.csv
+
+yarn.lock
