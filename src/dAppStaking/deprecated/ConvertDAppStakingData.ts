@@ -8,7 +8,7 @@ const totalStaked:number = 1420500;
 const claimedReward:number = 1885.4;
 
 const rewardPerShare = claimedReward * 0.8 / 2.0 / totalStaked;
-const fileName = `../../dApp staking copy ${era}.csv`;
+const fileName = `../../../dApp staking copy ${era}.csv`;
 
 fs.createReadStream(path.resolve(__dirname, 'assets', fileName))
     .pipe(csv.parse({ headers: false }))
@@ -52,7 +52,7 @@ function handleRow(rawRow:any){
 
 function printAll(){
     const csvStream = csv.format({ headers: false });
-    const fileStream = fs.createWriteStream("../../assets/rewardStatic.csv", {flags: 'a'});
+    const fileStream = fs.createWriteStream("../../../assets/rewardStatic.csv", {flags: 'a'});
     fileStream.write('\n');
     csvStream.pipe(fileStream).on('end', () => process.exit());
 

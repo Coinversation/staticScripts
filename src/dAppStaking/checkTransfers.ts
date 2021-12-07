@@ -2,27 +2,24 @@ import * as fs from "fs";
 import * as path from "path";
 import * as csv from "fast-csv";
 
-const transferHistoryFileName = `../../sb9TransferHistory.csv`;
-const sumedRewardFileName = `../../sumedReward.csv`;
+import sdnRewards from "./SdnBonus2.json"
+
+const transferHistoryFileName = `../../assets/sb9TransferHistory.csv`;
 
 
 const sb9 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
 const U3h = "Xrk2Nn1SsHRJxEwV3UqR6oKdfAAVWuN9FvNfCifqHYf3U3h";
 
-fs.createReadStream(path.resolve(__dirname, "assets", transferHistoryFileName))
+fs.createReadStream(path.resolve(__dirname, transferHistoryFileName))
   .pipe(csv.parse({ headers: false }))
   .on("error", (error) => console.error(error))
   .on("data", (row) => handleTransferHistory(row))
   .on("end", (rowCount: number) => {
     console.log(`Parsed ${rowCount} history rows`);
-    fs.createReadStream(path.resolve(__dirname, "assets", sumedRewardFileName))
-      .pipe(csv.parse({ headers: false }))
-      .on("error", (error) => console.error(error))
-      .on("data", (row) => handleRow(row))
-      .on("end", (rowCount: number) => {
-        console.log(`Parsed ${rowCount} sumed rows`);
-        diff();
-      });
+    for(const [key, value] of Object.entries(sdnRewards)){
+      handleRow({address: key, amount: value});
+    }
+    diff();
   });
 
 interface transferHistory {
@@ -67,12 +64,7 @@ interface rewardInfo {
 let address_reward = new Map<string, number>();
 
 
-function handleRow(rawRow:any){
-    const row:rewardInfo = {
-        address: String(rawRow[0]),
-        amount: Number.parseFloat(rawRow[1]),
-    }
-
+function handleRow(row:rewardInfo){
     const prevAmount = address_reward.get(row.address);
     // console.log(realAmount);
     // console.log(prevAmount);

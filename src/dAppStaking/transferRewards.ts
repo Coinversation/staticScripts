@@ -12,7 +12,9 @@ import BN from "bn.js";
 import { CsvFile } from "../../lib/rwCsv";
 import util from "util";
 
-const fileName = `../../sumedReward.csv`;
+import sdnBonus from "./SdnBonus2.json";
+
+
 const lostFileName = "../../rewardsLost.csv";
 
 const kaco_dev2 = "ZtbS4kZo6BjjqSPZLo9eFgy7c5q1qeR6WmNZPDtgRd8isb9";
@@ -28,14 +30,6 @@ let officialAccount: KeyringPair;
 let rewards: rewardInfo[] = [];
 let csvFile: CsvFile;
 
-function cacheRow(rawRow: any) {
-  const row: rewardInfo = {
-    address: String(rawRow[0]),
-    amount: Number.parseFloat(rawRow[1]),
-  };
-
-  rewards.push(row);
-}
 
 async function handleResults() {
   console.log("len", rewards.length);
@@ -159,7 +153,7 @@ async function main() {
     headers: ["address", "amount"],
   });
 
-  var log_file = fs.createWriteStream(__dirname + "/debug.log", { flags: "w" });
+  var log_file = fs.createWriteStream(path.resolve(__dirname, "log", "debug.log"), { flags: "w" });
   var log_stdout = process.stdout;
 
   console.log = function (d) {
@@ -187,23 +181,21 @@ async function main() {
   );
 
   console.log("ended ");
+
+  for(const [key, value] of Object.entries(sdnBonus)){
+    const row: rewardInfo = {
+      address: key,
+      amount: value,
+    };
+    rewards.push(row)
+  }
+
+  await handleResults();
 }
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-main()
-  .catch((e) => console.log("wss error, ", e))
-  .then(() => {
-    fs.createReadStream(path.resolve(__dirname, "assets", fileName))
-      .pipe(csv.parse({ headers: false }))
-      .on("error", (error) => {
-        console.log(error);
-      })
-      .on("data", (row) => cacheRow(row))
-      .on("end", (rowCount: number) => {
-        console.log(`Parsed ${rowCount} rows`);
-        handleResults();
-      });
-  });
+
+main();
