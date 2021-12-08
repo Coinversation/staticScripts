@@ -18,8 +18,8 @@ async function main() {
     api = await ApiPromise.create({ provider: wsProvider });
     console.log("connect endpoint");
 
-    for(let i = 33; i < 40; i++) {
-        await getRewardData(i, 0.1);
+    for(let i = 3; i < 40; i++) {
+        await getRewardData(i, 0.6);
     }
     console.log(JSON.stringify(sdnRewardMap));
 

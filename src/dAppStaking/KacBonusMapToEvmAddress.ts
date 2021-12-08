@@ -21,7 +21,8 @@ async function main() {
       for (const e of rJson.data) {
         const finalNum = typedJsonData[Object.keys(e)[0]];
         if (finalNum > 0) {
-          kacBonusEvmAddressMap[Object.values(e)[0]] = finalNum;
+          const prevAmount = kacBonusEvmAddressMap[Object.values(e)[0]];
+          kacBonusEvmAddressMap[Object.values(e)[0]] = finalNum + (prevAmount ? prevAmount : 0);
         }
       }
     }
